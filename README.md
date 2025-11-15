@@ -46,6 +46,11 @@ A modular, Ubuntu-focused router platform optimized for Raspberry Pi 3B+. It com
 - Run API: `npm run dev:api`
 - Open UI: `http://localhost:3000` (proxies `/api` → `http://localhost:8080`)
 
+## Default Credentials
+- Username: `admin`
+- Password: `admin`
+- Change the password immediately via `POST /api/auth/change-password`.
+
 ## Build UI (Production)
 - `cd web && npm ci && npm run build`
 - Built files output to `public/`
@@ -53,6 +58,7 @@ A modular, Ubuntu-focused router platform optimized for Raspberry Pi 3B+. It com
 ## Environment Variables
 - `PORT` — API port (default `8080`)
 - `JWT_SECRET` — token secret for admin auth
+- `DEFAULT_ADMIN_PASSWORD` — seed password for default `admin` user (default `admin`)
 
 ## Key Endpoints
 - `GET /api/health` — API health status
