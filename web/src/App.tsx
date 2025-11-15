@@ -7,7 +7,8 @@ function App() {
   const [stats, setStats] = useState<any>(null)
 
   useEffect(() => {
-    axios.get('/api/health').then(r => setHealth(r.data)).catch(() => setHealth({ error: true }))
+    const apiBase = `${location.origin}`
+    axios.get(`${apiBase}/api/health`).then(r => setHealth(r.data)).catch((err) => setHealth({ error: true, message: String(err) }))
     const ws = new WebSocket(`${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`)
     ws.onopen = () => setWsStatus('open')
     ws.onclose = () => setWsStatus('closed')
