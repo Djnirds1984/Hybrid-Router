@@ -31,12 +31,13 @@ mkdir -p "$PUB_DIR"
 
 cat > /etc/nginx/sites-available/hybrid-router <<EOF
 server {
-  listen 80;
+  listen 80 default_server;
   server_name ${SERVER_NAME};
   root ${PUB_DIR};
+  index index.html;
 
   location / {
-    try_files \$uri /index.html;
+    try_files \$uri \$uri/ /index.html;
   }
 
   location /api/ {
@@ -57,6 +58,8 @@ server {
 EOF
 
 ln -sf /etc/nginx/sites-available/hybrid-router /etc/nginx/sites-enabled/hybrid-router
+# Disable default site to prevent Nginx welcome page
+if [ -e /etc/nginx/sites-enabled/default ]; then rm -f /etc/nginx/sites-enabled/default; fi
 nginx -t
 systemctl enable nginx
 systemctl restart nginx
