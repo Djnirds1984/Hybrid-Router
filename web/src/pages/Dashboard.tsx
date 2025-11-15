@@ -32,7 +32,7 @@ export default function Dashboard() {
       <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-secondary-800 rounded p-4">
           <div className="text-sm text-secondary-300">API Health</div>
-          <div className="mt-2 text-lg">{health ? ('healthy' in health ? 'Healthy' : 'Error') : 'Loading...'}</div>
+          <div className="mt-2 text-lg">{health ? (health.status === 'healthy' ? 'Healthy' : 'Error') : 'Loading...'}</div>
         </div>
         <div className="bg-secondary-800 rounded p-4">
           <div className="text-sm text-secondary-300">WebSocket</div>
