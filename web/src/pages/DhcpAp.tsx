@@ -9,7 +9,8 @@ export default function DhcpAp() {
     try { const l = await api.get('/network/dhcp-leases'); setLeases(Array.isArray(l.data)?l.data:[]) } catch {}
   }
   useEffect(()=>{ load() },[])
-  const control = async (service: string, action: string) => { await api.post(`/system/services/${service}/${action}`); load() }
+  const [busy, setBusy] = useState<string | null>(null)
+  const control = async (service: string, action: string) => { setBusy(service+action); try { await api.post(`/system/services/${service}/${action}`); } finally { setBusy(null); load() } }
   return (
     <div className="p-6">
       <h2 className="text-xl font-semibold">DHCP & AP</h2>
@@ -17,8 +18,8 @@ export default function DhcpAp() {
         <div className="bg-secondary-800 p-4 rounded">
           <div className="text-sm text-secondary-300 mb-2">Services</div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between"><span>dnsmasq</span><span>{services?.dnsmasq? 'active':'inactive'}</span><div className="flex gap-2"><button onClick={()=>control('dnsmasq','restart')} className="bg-primary-600 px-3 py-1 rounded">Restart</button><button onClick={()=>control('dnsmasq','stop')} className="bg-secondary-700 px-3 py-1 rounded">Stop</button></div></div>
-            <div className="flex items-center justify-between"><span>hostapd</span><span>{services?.hostapd? 'active':'inactive'}</span><div className="flex gap-2"><button onClick={()=>control('hostapd','restart')} className="bg-primary-600 px-3 py-1 rounded">Restart</button><button onClick={()=>control('hostapd','stop')} className="bg-secondary-700 px-3 py-1 rounded">Stop</button></div></div>
+            <div className="flex items-center justify-between"><span>dnsmasq</span><span>{services?.dnsmasq? 'active':'inactive'}</span><div className="flex gap-2"><button disabled={busy==='dnsmasqrestart'} onClick={()=>control('dnsmasq','restart')} className="bg-primary-600 px-3 py-1 rounded disabled:opacity-50">Restart</button><button disabled={busy==='dnsmasqstop'} onClick={()=>control('dnsmasq','stop')} className="bg-secondary-700 px-3 py-1 rounded disabled:opacity-50">Stop</button></div></div>
+            <div className="flex items-center justify-between"><span>hostapd</span><span>{services?.hostapd? 'active':'inactive'}</span><div className="flex gap-2"><button disabled={busy==='hostapdrestart'} onClick={()=>control('hostapd','restart')} className="bg-primary-600 px-3 py-1 rounded disabled:opacity-50">Restart</button><button disabled={busy==='hostapdstop'} onClick={()=>control('hostapd','stop')} className="bg-secondary-700 px-3 py-1 rounded disabled:opacity-50">Stop</button></div></div>
           </div>
         </div>
         <div className="bg-secondary-800 p-4 rounded">
