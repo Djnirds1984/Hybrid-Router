@@ -64,22 +64,7 @@ WantedBy=multi-user.target
 - Check status: `systemctl status hybrid-router`
 
 ## NAT Router (Ethernet WAN, Wi-Fi LAN)
-- Replace interface names as needed (`eth0` WAN, `wlan0` LAN).
-- iptables (legacy):
-  - `sudo iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE`
-  - `sudo iptables -A FORWARD -i eth0 -o wlan0 -m state --state RELATED,ESTABLISHED -j ACCEPT`
-  - `sudo iptables -A FORWARD -i wlan0 -o eth0 -j ACCEPT`
-  - Persist: `sudo sh -c 'iptables-save > /etc/iptables/rules.v4'`
-- nftables (preferred on Ubuntu):
-  - `sudo nft add table ip nat`
-  - `sudo nft add chain ip nat postrouting '{ type nat hook postrouting priority 100; }'`
-  - `sudo nft add rule ip nat postrouting oifname "eth0" masquerade`
-  - Forwarding example:
-    - `sudo nft add table ip filter`
-    - `sudo nft add chain ip filter forward '{ type filter hook forward priority 0; policy drop; }'`
-    - `sudo nft add rule ip filter forward ct state established,related accept`
-    - `sudo nft add rule ip filter forward iifname "wlan0" oifname "eth0" accept`
-- Persist: create `/etc/nftables.conf` and run `sudo systemctl enable --now nftables`
+All configuration is handled by the installation script. No manual CLI steps are required beyond initial system updates and cloning.
 
 ### Installation Script
 - Run: `sudo bash scripts/install_nat_router.sh`
@@ -88,33 +73,13 @@ WantedBy=multi-user.target
   - `--lan-start 192.168.50.10` `--lan-end 192.168.50.200` `--lan-gw 192.168.50.1`
   - `--ssid HybridRouter` `--psk ChangeMeStrong!` `--channel 6`
   - `--firewall nftables|iptables`
+  - `--install-dir /opt/hybrid-router` `--jwt-secret <secret>` `--default-admin <password>`
 
 ## DHCP Server (dnsmasq)
-- The API’s Python script can generate per-interface configs under `/etc/dnsmasq.d/`.
-- Manual config example `/etc/dnsmasq.d/dhcp-wlan0.conf`:
-```
-interface=wlan0
-dhcp-range=192.168.50.10,192.168.50.200,255.255.255.0,24h
-dhcp-option=3,192.168.50.1
-dhcp-option=6,1.1.1.1,8.8.8.8
-```
-- Restart service: `sudo systemctl restart dnsmasq`
+Configured automatically by the installation script; no manual steps required.
 
 ## Wireless AP (hostapd)
-- Create `/etc/hostapd/hostapd.conf`:
-```
-interface=wlan0
-driver=nl80211
-ssid=HybridRouter
-hw_mode=g
-channel=6
-wpa=2
-wpa_passphrase=ChangeMeStrong!
-wpa_key_mgmt=WPA-PSK
-wpa_pairwise=CCMP
-ieee80211n=1
-```
-- Enable hostapd: `sudo systemctl enable --now hostapd`
+Configured automatically by the installation script; no manual steps required.
 
 ## Raspberry Pi 3B+ Notes
 - OS: Ubuntu Server ARM64 or Raspberry Pi OS Lite.
