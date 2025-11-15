@@ -219,4 +219,103 @@ router.post('/firewall-rules', authenticateToken, [
   }
 });
 
+router.post('/nat/enable', authenticateToken, [
+  body('method').isIn(['nftables', 'iptables']),
+  body('wan').isLength({ min: 1 }),
+  body('lan').isLength({ min: 1 })
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { method, wan, lan } = req.body;
+    const options = {
+      mode: 'text',
+      pythonPath: 'python3',
+      pythonOptions: ['-u'],
+      scriptPath: path.join(__dirname, '../scripts'),
+      args: ['enable_nat', method, wan, lan]
+    };
+    PythonShell.run('firewall_utils.py', options, function (err, results) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to enable NAT' });
+      }
+      try {
+        const result = JSON.parse(results[0]);
+        if (result.success) {
+          res.json({ message: 'NAT enabled' });
+        } else {
+          res.status(400).json({ error: result.error || 'Failed to enable NAT' });
+        }
+      } catch {
+        res.status(500).json({ error: 'Failed to parse result' });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.post('/nat/disable', authenticateToken, [
+  body('method').isIn(['nftables', 'iptables'])
+], async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { method } = req.body;
+    const options = {
+      mode: 'text',
+      pythonPath: 'python3',
+      pythonOptions: ['-u'],
+      scriptPath: path.join(__dirname, '../scripts'),
+      args: ['disable_nat', method]
+    };
+    PythonShell.run('firewall_utils.py', options, function (err, results) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to disable NAT' });
+      }
+      try {
+        const result = JSON.parse(results[0]);
+        if (result.success) {
+          res.json({ message: 'NAT disabled' });
+        } else {
+          res.status(400).json({ error: result.error || 'Failed to disable NAT' });
+        }
+      } catch {
+        res.status(500).json({ error: 'Failed to parse result' });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/nat/status', authenticateToken, async (req, res) => {
+  try {
+    const options = {
+      mode: 'text',
+      pythonPath: 'python3',
+      pythonOptions: ['-u'],
+      scriptPath: path.join(__dirname, '../scripts'),
+      args: ['nat_status']
+    };
+    PythonShell.run('firewall_utils.py', options, function (err, results) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to get NAT status' });
+      }
+      try {
+        const status = JSON.parse(results[0]);
+        res.json(status);
+      } catch {
+        res.status(500).json({ error: 'Failed to parse NAT status' });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

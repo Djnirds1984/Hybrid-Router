@@ -241,6 +241,48 @@ def get_firewall_status():
     except Exception as e:
         return {'active': False, 'error': str(e)}
 
+def enable_nat(method, wan, lan):
+    try:
+        if method == 'nftables':
+            subprocess.run(['nft', 'flush', 'ruleset'], check=False)
+            subprocess.run(['nft', 'add', 'table', 'ip', 'nat'], check=False)
+            subprocess.run(['nft', 'add', 'chain', 'ip', 'nat', 'postrouting', '{', 'type', 'nat', 'hook', 'postrouting', 'priority', '100', ';', '}'], check=False)
+            subprocess.run(['nft', 'add', 'rule', 'ip', 'nat', 'postrouting', 'oifname', wan, 'masquerade'], check=True)
+            subprocess.run(['nft', 'add', 'table', 'ip', 'filter'], check=False)
+            subprocess.run(['nft', 'add', 'chain', 'ip', 'filter', 'forward', '{', 'type', 'filter', 'hook', 'forward', 'priority', '0', ';', 'policy', 'drop', ';', '}'], check=False)
+            subprocess.run(['nft', 'add', 'rule', 'ip', 'filter', 'forward', 'ct', 'state', 'established,related', 'accept'], check=False)
+            subprocess.run(['nft', 'add', 'rule', 'ip', 'filter', 'forward', 'iifname', lan, 'oifname', wan, 'accept'], check=True)
+            return {'success': True}
+        if method == 'iptables':
+            subprocess.run(['iptables', '-t', 'nat', '-A', 'POSTROUTING', '-o', wan, '-j', 'MASQUERADE'], check=True)
+            subprocess.run(['iptables', '-A', 'FORWARD', '-i', wan, '-o', lan, '-m', 'state', '--state', 'RELATED,ESTABLISHED', '-j', 'ACCEPT'], check=True)
+            subprocess.run(['iptables', '-A', 'FORWARD', '-i', lan, '-o', wan, '-j', 'ACCEPT'], check=True)
+            return {'success': True}
+        return {'success': False, 'error': 'invalid_method'}
+    except subprocess.CalledProcessError as e:
+        return {'success': False, 'error': str(e)}
+
+def disable_nat(method):
+    try:
+        if method == 'nftables':
+            subprocess.run(['nft', 'flush', 'ruleset'], check=True)
+            return {'success': True}
+        if method == 'iptables':
+            subprocess.run(['iptables', '-t', 'nat', '-F'], check=False)
+            subprocess.run(['iptables', '-F', 'FORWARD'], check=False)
+            return {'success': True}
+        return {'success': False, 'error': 'invalid_method'}
+    except subprocess.CalledProcessError as e:
+        return {'success': False, 'error': str(e)}
+
+def nat_status():
+    try:
+        r1 = subprocess.run(['nft', 'list', 'ruleset'], capture_output=True, text=True)
+        r2 = subprocess.run(['iptables', '-t', 'nat', '-S'], capture_output=True, text=True)
+        return {'nftables': ('masquerade' in r1.stdout), 'iptables': ('POSTROUTING -o' in r2.stdout)}
+    except Exception as e:
+        return {'error': str(e)}
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: firewall_utils.py <command> [args...]", file=sys.stderr)
@@ -278,6 +320,19 @@ def main():
         
         elif command == 'firewall_status':
             result = get_firewall_status()
+            print(json.dumps(result))
+        elif command == 'enable_nat':
+            method = sys.argv[2]
+            wan = sys.argv[3]
+            lan = sys.argv[4]
+            result = enable_nat(method, wan, lan)
+            print(json.dumps(result))
+        elif command == 'disable_nat':
+            method = sys.argv[2]
+            result = disable_nat(method)
+            print(json.dumps(result))
+        elif command == 'nat_status':
+            result = nat_status()
             print(json.dumps(result))
         
         else:
