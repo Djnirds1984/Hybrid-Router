@@ -9,7 +9,7 @@
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git nodejs npm python3 python3-psutil python3-netifaces dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3
 sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router
-cd /opt/hybrid-router && sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret 'router-secret-CHANGE-ME' --default-admin 'Admin@12345!'
+cd /opt/hybrid-router && sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret 'router-secret-CHANGE-ME' --default-admin 'admin'
 sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router
 # optional reverse proxy
 sudo bash scripts/install_nginx_proxy.sh --install-dir /opt/hybrid-router --api-port 8080 --server-name your.domain --enable-tls true --email admin@your.domain
@@ -20,7 +20,7 @@ sudo bash scripts/install_nginx_proxy.sh --install-dir /opt/hybrid-router --api-
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y git nodejs npm python3 python3-psutil python3-netifaces dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3
 git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router
-sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret 'router-secret-CHANGE-ME' --default-admin 'Admin@12345!'
+sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret 'router-secret-CHANGE-ME' --default-admin 'admin'
 sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router
 ```
 
@@ -52,7 +52,7 @@ sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router
 - Step 1: Update and install essentials (see prerequisites)
 - Step 2: Clone repository (production or development)
 - Step 3: Install API service
-  - `sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret 'router-secret-CHANGE-ME' --default-admin 'Admin@12345!'`
+  - `sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret 'router-secret-CHANGE-ME' --default-admin 'admin'`
 - Step 4: Configure NAT Router
   - `sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router`
   - Optional: `--wan eth0 --lan wlan0 --lan-subnet 192.168.50.0/24 --lan-start 192.168.50.10 --lan-end 192.168.50.200 --lan-gw 192.168.50.1 --ssid HybridRouter --psk ChangeMeStrong! --channel 6 --firewall nftables|iptables`
