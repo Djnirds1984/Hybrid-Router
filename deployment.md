@@ -19,7 +19,7 @@
   - `sudo sysctl -p /etc/sysctl.d/99-router.conf`
 
 ## Clone and Build
-- Clone repo: `git clone https://github.com/<your-org>/Hybrid-Router.git && cd Hybrid-Router`
+- Clone repo: `git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router`
 - Install API deps: `npm ci`
 - Build Web UI:
   - `cd web && npm ci && npm run build && cd ..`
@@ -33,6 +33,8 @@
 ## Production Layout
 - Copy project to `/opt/hybrid-router`:
   - `sudo mkdir -p /opt/hybrid-router && sudo rsync -a --exclude='.git' ./ /opt/hybrid-router/`
+- Alternatively, clone directly from GitHub to `/opt/hybrid-router`:
+  - `sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router`
 - Install dependencies under `/opt/hybrid-router`:
   - `cd /opt/hybrid-router && sudo npm ci && cd web && sudo npm ci && sudo npm run build && cd ..`
 
