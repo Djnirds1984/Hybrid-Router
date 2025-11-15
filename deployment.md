@@ -49,6 +49,25 @@
 -
 - After installation, the service runs automatically; status: `systemctl status hybrid-router`
 
+## Reverse Proxy
+For larger deployments, use a reverse proxy to serve the UI and forward API and WebSocket traffic.
+
+### Nginx
+- Run: `sudo bash scripts/install_nginx_proxy.sh`
+- Optional flags:
+  - `--install-dir /opt/hybrid-router`
+  - `--api-port 8080`
+  - `--server-name your.domain`
+  - `--enable-tls true` `--email admin@your.domain`
+
+### Apache
+- Run: `sudo bash scripts/install_apache_proxy.sh`
+- Optional flags:
+  - `--install-dir /opt/hybrid-router`
+  - `--api-port 8080`
+  - `--server-name your.domain`
+  - `--enable-tls true` `--email admin@your.domain`
+
 ## NAT Router (Ethernet WAN, Wi-Fi LAN)
 All configuration is handled by the installation script. No manual CLI steps are required beyond initial system updates and cloning.
 
