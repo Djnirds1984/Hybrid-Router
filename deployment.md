@@ -39,29 +39,15 @@
   - `cd /opt/hybrid-router && sudo npm ci && cd web && sudo npm ci && sudo npm run build && cd ..`
 
 ## Systemd Service (API)
-- Create unit `/etc/systemd/system/hybrid-router.service`:
-```
-[Unit]
-Description=Hybrid Router API
-After=network.target
-
-[Service]
-Type=simple
-WorkingDirectory=/opt/hybrid-router
-ExecStart=/usr/bin/node /opt/hybrid-router/api/server.js
-Restart=always
-User=root
-Environment=PORT=8080
-Environment=JWT_SECRET=change_me
-
-[Install]
-WantedBy=multi-user.target
-```
-- Enable and start:
-  - `sudo systemctl daemon-reload`
-  - `sudo systemctl enable hybrid-router`
-  - `sudo systemctl start hybrid-router`
-- Check status: `systemctl status hybrid-router`
+- Run: `sudo bash scripts/install_api_service.sh`
+- Optional flags:
+  - `--install-dir /opt/hybrid-router`
+  - `--port 8080`
+  - `--jwt-secret <secret>`
+  - `--default-admin <password>`
+  - `--node /usr/bin/node`
+-
+- After installation, the service runs automatically; status: `systemctl status hybrid-router`
 
 ## NAT Router (Ethernet WAN, Wi-Fi LAN)
 All configuration is handled by the installation script. No manual CLI steps are required beyond initial system updates and cloning.
