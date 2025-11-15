@@ -35,10 +35,13 @@ const logger = winston.createLogger({
   ]
 });
 
+app.set('trust proxy', 'loopback');
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
-  message: 'Too many requests from this IP, please try again later.'
+  message: 'Too many requests from this IP, please try again later.',
+  keyGenerator: (req) => (req.ip || '' ).replace(/:\d+[^:]*$/, ''),
+  validate: { ip: false, trustProxy: false, xForwardedForHeader: false, forwardedHeader: false }
 });
 
 app.use(helmet({
