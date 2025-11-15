@@ -79,7 +79,15 @@ WantedBy=multi-user.target
     - `sudo nft add chain ip filter forward '{ type filter hook forward priority 0; policy drop; }'`
     - `sudo nft add rule ip filter forward ct state established,related accept`
     - `sudo nft add rule ip filter forward iifname "wlan0" oifname "eth0" accept`
-  - Persist: create `/etc/nftables.conf` and run `sudo systemctl enable --now nftables`
+- Persist: create `/etc/nftables.conf` and run `sudo systemctl enable --now nftables`
+
+### Installation Script
+- Run: `sudo bash scripts/install_nat_router.sh`
+- Optional flags:
+  - `--wan eth0` `--lan wlan0` `--lan-subnet 192.168.50.0/24`
+  - `--lan-start 192.168.50.10` `--lan-end 192.168.50.200` `--lan-gw 192.168.50.1`
+  - `--ssid HybridRouter` `--psk ChangeMeStrong!` `--channel 6`
+  - `--firewall nftables|iptables`
 
 ## DHCP Server (dnsmasq)
 - The API’s Python script can generate per-interface configs under `/etc/dnsmasq.d/`.
