@@ -10,6 +10,7 @@ LAN_GW=${LAN_GW:-192.168.50.1}
 SSID=${SSID:-HybridRouter}
 PSK=${PSK:-ChangeMeStrong!}
 CHANNEL=${CHANNEL:-6}
+COUNTRY_CODE=${COUNTRY_CODE:-US}
 FIREWALL=${FIREWALL:-nftables}
 INSTALL_DIR=${INSTALL_DIR:-/opt/hybrid-router}
 JWT_SECRET=${JWT_SECRET:-change_me}
@@ -40,6 +41,17 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 PREFIX=${LAN_SUBNET#*/}
+case "$PREFIX" in
+  8) NETMASK=255.0.0.0 ;;
+  12) NETMASK=255.240.0.0 ;;
+  16) NETMASK=255.255.0.0 ;;
+  20) NETMASK=255.255.240.0 ;;
+  24) NETMASK=255.255.255.0 ;;
+  28) NETMASK=255.255.255.240 ;;
+  30) NETMASK=255.255.255.252 ;;
+  32) NETMASK=255.255.255.255 ;;
+  *) NETMASK=255.255.255.0 ;;
+esac
 
 apt-get update -y
 apt-get install -y dnsmasq hostapd nftables iptables iptables-persistent net-tools bridge-utils sqlite3 python3 python3-psutil python3-netifaces
@@ -50,14 +62,27 @@ sysctl -p /etc/sysctl.d/99-router.conf
 ip link set "$LAN_IF" up || true
 ip addr flush dev "$LAN_IF" || true
 ip addr add "$LAN_GW/$PREFIX" dev "$LAN_IF"
+rfkill unblock wifi || true
 
 mkdir -p /etc/dnsmasq.d
+cat > /etc/dnsmasq.conf <<EOF
+port=0
+conf-dir=/etc/dnsmasq.d,*.conf
+bind-interfaces
+except-interface=lo
+EOF
 cat > "/etc/dnsmasq.d/dhcp-${LAN_IF}.conf" <<EOF
 interface=${LAN_IF}
-dhcp-range=${LAN_START},${LAN_END},${LAN_SUBNET#*/},24h
+port=0
+dhcp-range=${LAN_START},${LAN_END},${NETMASK},24h
 dhcp-option=3,${LAN_GW}
 dhcp-option=6,1.1.1.1,8.8.8.8
 EOF
+
+# Validate dnsmasq config; if it fails on netmask format, fallback to interface-implied netmask
+if ! dnsmasq --test >/dev/null 2>&1; then
+  sed -i "s/^dhcp-range=.*/dhcp-range=${LAN_START},${LAN_END},24h/" "/etc/dnsmasq.d/dhcp-${LAN_IF}.conf"
+fi
 
 systemctl restart dnsmasq
 systemctl enable dnsmasq
@@ -73,6 +98,8 @@ wpa_passphrase=${PSK}
 wpa_key_mgmt=WPA-PSK
 wpa_pairwise=CCMP
 ieee80211n=1
+country_code=${COUNTRY_CODE}
+ieee80211d=1
 EOF
 
 if [ -f /etc/default/hostapd ]; then
