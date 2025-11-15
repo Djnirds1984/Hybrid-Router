@@ -54,7 +54,7 @@ case "$PREFIX" in
 esac
 
 apt-get update -y
-apt-get install -y dnsmasq hostapd nftables iptables iptables-persistent net-tools bridge-utils sqlite3 python3 python3-psutil python3-netifaces
+apt-get install -y dnsmasq hostapd nftables iptables iptables-persistent net-tools bridge-utils sqlite3 python3 python3-psutil python3-netifaces rfkill
 
 echo net.ipv4.ip_forward=1 > /etc/sysctl.d/99-router.conf
 sysctl -p /etc/sysctl.d/99-router.conf
@@ -70,6 +70,10 @@ port=0
 conf-dir=/etc/dnsmasq.d,*.conf
 bind-interfaces
 except-interface=lo
+EOF
+cat > /etc/default/dnsmasq <<EOF
+ENABLED=1
+DNSMASQ_OPTS="--conf-file=/etc/dnsmasq.conf --port=0"
 EOF
 cat > "/etc/dnsmasq.d/dhcp-${LAN_IF}.conf" <<EOF
 interface=${LAN_IF}
