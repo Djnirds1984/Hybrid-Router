@@ -5,7 +5,8 @@
 - Covers prerequisites, build, system services, and network configuration (NAT/AP).
 
 ## Supported Boards
-- Ubuntu Server (x86_64 and ARM64)
+- Ubuntu Server x86_64 (Intel Xeon-class servers)
+- Ubuntu Server ARM64 (general ARM boards)
 - Raspberry Pi 3B+ (Ubuntu Server 22.04/24.04 ARM64 or Raspberry Pi OS)
 
 ## Prerequisites

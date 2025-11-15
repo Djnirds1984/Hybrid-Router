@@ -29,8 +29,13 @@ A modular, Ubuntu-focused router platform optimized for Raspberry Pi 3B+. It com
 - `web/` — React UI source (Vite + Tailwind)
 - `deployment.md` — Board installation and service setup guide
 
+## Supported Boards
+- Ubuntu Server x86_64 (Intel Xeon-class servers)
+- Ubuntu Server ARM64
+- Raspberry Pi 3B+
+
 ## Requirements
-- Ubuntu Server 22.04/24.04 (x86_64 or ARM64) or Raspberry Pi 3B+
+- Ubuntu Server 22.04/24.04 (x86_64 on Intel Xeon or ARM64) or Raspberry Pi 3B+
 - Node.js 18+ and npm
 - Python 3 with `psutil`, `netifaces`
 - `dnsmasq`, `hostapd`, `iptables`/`nftables`, `sqlite3`
