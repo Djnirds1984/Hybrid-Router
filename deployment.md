@@ -4,6 +4,26 @@
 - Installs and runs Hybrid Router on Ubuntu Linux and Raspberry Pi 3B+.
 - Covers prerequisites, build, system services, and network configuration (NAT/AP).
 
+## Quick Install (Production)
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git nodejs npm python3 python3-psutil python3-netifaces dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3
+sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router
+cd /opt/hybrid-router && sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret <secret> --default-admin <password>
+sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router
+# optional reverse proxy
+sudo bash scripts/install_nginx_proxy.sh --install-dir /opt/hybrid-router --api-port 8080 --server-name your.domain --enable-tls true --email admin@your.domain
+```
+
+## Quick Install (Development)
+```
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git nodejs npm python3 python3-psutil python3-netifaces dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3
+git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router
+sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret <secret> --default-admin <password>
+sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router
+```
+
 ## Supported Boards
 - Ubuntu Server x86_64 (Intel Xeon-class servers)
 - Ubuntu Server ARM64 (general ARM boards)
@@ -20,9 +40,8 @@
 ## Repository Location and Clone
 - Recommended production path: `/opt/hybrid-router`
   - `sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router`
-- Alternatively, clone to your home directory and let the scripts deploy to `/opt/hybrid-router`:
+- Or clone anywhere and pass `--install-dir /opt/hybrid-router` to scripts:
   - `git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router`
-  - Use `--install-dir /opt/hybrid-router` when running installation scripts
 
 ## Run (Development)
 - Start API: `npm run dev:api` (port `8080`)
@@ -30,19 +49,14 @@
 - Open UI: `http://localhost:3000`
 
 ## Installation Steps
-- Step 1: System update and essentials
-  - `sudo apt update && sudo apt upgrade -y`
-  - `sudo apt install -y git nodejs npm python3 python3-psutil python3-netifaces dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3`
-- Step 2: Clone repository (choose one)
-  - Production: `sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router`
-  - Development: `git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router`
-- Step 3: Install API service (no manual config needed)
-  - If cloned to `/opt/hybrid-router`: `cd /opt/hybrid-router && sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret <secret> --default-admin <password>`
-  - If cloned elsewhere: from repo root `sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret <secret> --default-admin <password>`
-- Step 4: Configure NAT Router (Ethernet WAN, Wi‑Fi LAN)
-  - Run: `sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router`
-  - Optional flags: `--wan eth0 --lan wlan0 --lan-subnet 192.168.50.0/24 --lan-start 192.168.50.10 --lan-end 192.168.50.200 --lan-gw 192.168.50.1 --ssid HybridRouter --psk ChangeMeStrong! --channel 6 --firewall nftables|iptables`
-- Step 5 (optional): Reverse proxy for large deployments
+- Step 1: Update and install essentials (see prerequisites)
+- Step 2: Clone repository (production or development)
+- Step 3: Install API service
+  - `sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret <secret> --default-admin <password>`
+- Step 4: Configure NAT Router
+  - `sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router`
+  - Optional: `--wan eth0 --lan wlan0 --lan-subnet 192.168.50.0/24 --lan-start 192.168.50.10 --lan-end 192.168.50.200 --lan-gw 192.168.50.1 --ssid HybridRouter --psk ChangeMeStrong! --channel 6 --firewall nftables|iptables`
+- Step 5: Optional reverse proxy (Nginx or Apache)
   - Nginx: `sudo bash scripts/install_nginx_proxy.sh --install-dir /opt/hybrid-router --api-port 8080 --server-name your.domain --enable-tls true --email admin@your.domain`
   - Apache: `sudo bash scripts/install_apache_proxy.sh --install-dir /opt/hybrid-router --api-port 8080 --server-name your.domain --enable-tls true --email admin@your.domain`
 - Install dependencies under `/opt/hybrid-router`:
