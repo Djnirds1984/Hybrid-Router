@@ -23,6 +23,11 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
+if command -v apt-get >/dev/null 2>&1; then
+  apt-get update -y
+  apt-get install -y build-essential python3-dev pkg-config
+fi
+
 mkdir -p "$INSTALL_DIR"
 rsync -a --exclude='.git' --exclude='node_modules' ./ "$INSTALL_DIR"/
 cd "$INSTALL_DIR"
@@ -33,6 +38,8 @@ if command -v npm >/dev/null 2>&1; then
   npm run build
   cd ..
 fi
+
+mkdir -p ${INSTALL_DIR}/logs ${INSTALL_DIR}/api/data
 
 cat > /etc/systemd/system/hybrid-router.service <<EOF
 [Unit]
