@@ -77,7 +77,6 @@ DNSMASQ_OPTS="--conf-file=/etc/dnsmasq.conf --port=0"
 EOF
 cat > "/etc/dnsmasq.d/dhcp-${LAN_IF}.conf" <<EOF
 interface=${LAN_IF}
-port=0
 dhcp-range=${LAN_START},${LAN_END},${NETMASK},24h
 dhcp-option=3,${LAN_GW}
 dhcp-option=6,1.1.1.1,8.8.8.8
