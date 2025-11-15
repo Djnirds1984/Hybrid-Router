@@ -65,6 +65,56 @@ router.get('/resources', authenticateToken, async (req, res) => {
   }
 });
 
+router.get('/storage', authenticateToken, async (req, res) => {
+  try {
+    const options = {
+      mode: 'text',
+      pythonPath: 'python3',
+      pythonOptions: ['-u'],
+      scriptPath: path.join(__dirname, '../scripts'),
+      args: ['storage_info']
+    };
+    PythonShell.run('system_utils.py', options, function (err, results) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to get storage info' });
+      }
+      try {
+        const info = JSON.parse(results[0]);
+        res.json(info);
+      } catch {
+        res.status(500).json({ error: 'Failed to parse storage info' });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/wan', authenticateToken, async (req, res) => {
+  try {
+    const options = {
+      mode: 'text',
+      pythonPath: 'python3',
+      pythonOptions: ['-u'],
+      scriptPath: path.join(__dirname, '../scripts'),
+      args: ['wan_status']
+    };
+    PythonShell.run('system_utils.py', options, function (err, results) {
+      if (err) {
+        return res.status(500).json({ error: 'Failed to get WAN status' });
+      }
+      try {
+        const wan = JSON.parse(results[0]);
+        res.json(wan);
+      } catch {
+        res.status(500).json({ error: 'Failed to parse WAN status' });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 router.post('/reboot', authenticateToken, async (req, res) => {
   try {
     const options = {

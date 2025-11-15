@@ -34,6 +34,19 @@ def resource_usage():
         mem = psutil.virtual_memory()
         disk = psutil.disk_usage('/') if os.path.exists('/') else None
         nets = psutil.net_io_counters()
+        temps = []
+        try:
+            base = '/sys/class/thermal'
+            if os.path.isdir(base):
+                for name in os.listdir(base):
+                    p = os.path.join(base, name, 'temp')
+                    if os.path.isfile(p):
+                        with open(p) as f:
+                            v = f.read().strip()
+                            if v.isdigit():
+                                temps.append(int(v) / 1000.0)
+        except Exception:
+            pass
         return {
             'cpu_percent': cpu,
             'memory': {
@@ -50,8 +63,40 @@ def resource_usage():
             'network': {
                 'bytes_sent': nets.bytes_sent,
                 'bytes_recv': nets.bytes_recv
-            }
+            },
+            'temperature_c': sum(temps)/len(temps) if temps else None
         }
+    except Exception as e:
+        return {'error': str(e)}
+
+def storage_info():
+    try:
+        parts = psutil.disk_partitions(all=False)
+        arr = []
+        for p in parts:
+            try:
+                u = psutil.disk_usage(p.mountpoint)
+                arr.append({'device': p.device, 'mount': p.mountpoint, 'fstype': p.fstype, 'total': u.total, 'used': u.used, 'percent': u.percent})
+            except Exception:
+                pass
+        return arr
+    except Exception as e:
+        return {'error': str(e)}
+
+def wan_status():
+    try:
+        gw = ''
+        try:
+            r = subprocess.run(['ip', 'route', 'show', 'default'], capture_output=True, text=True)
+            line = r.stdout.strip().split('\n')[0] if r.stdout.strip() else ''
+            if 'via' in line:
+                parts = line.split()
+                gw = parts[parts.index('via')+1]
+        except Exception:
+            pass
+        ping = subprocess.run(['ping', '-c', '2', '-W', '2', '8.8.8.8'], capture_output=True)
+        ok = (ping.returncode == 0)
+        return {'default_gateway': gw, 'internet': ok}
     except Exception as e:
         return {'error': str(e)}
 
@@ -110,6 +155,8 @@ def main():
         print(json.dumps(system_status()))
     elif cmd == 'resource_usage':
         print(json.dumps(resource_usage()))
+    elif cmd == 'storage_info':
+        print(json.dumps(storage_info()))
     elif cmd == 'system_reboot':
         print(json.dumps(system_reboot()))
     elif cmd == 'get_logs':
@@ -122,6 +169,8 @@ def main():
         service = sys.argv[2]
         action = sys.argv[3]
         print(json.dumps(service_control(service, action)))
+    elif cmd == 'wan_status':
+        print(json.dumps(wan_status()))
     else:
         print('Unknown command', file=sys.stderr)
         sys.exit(1)
