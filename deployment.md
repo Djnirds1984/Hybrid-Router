@@ -12,8 +12,7 @@
 ## Prerequisites
 - Update system: `sudo apt update && sudo apt upgrade -y`
 - Install packages:
-  - `sudo apt install -y git nodejs npm python3 python3-pip dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3`
-- Python libs: `pip3 install psutil netifaces`
+  - `sudo apt install -y git nodejs npm python3 python3-psutil python3-netifaces dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3`
 - Enable IP forwarding:
   - `echo 'net.ipv4.ip_forward=1' | sudo tee /etc/sysctl.d/99-router.conf`
   - `sudo sysctl -p /etc/sysctl.d/99-router.conf`

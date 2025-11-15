@@ -42,8 +42,7 @@ fi
 PREFIX=${LAN_SUBNET#*/}
 
 apt-get update -y
-apt-get install -y dnsmasq hostapd nftables iptables iptables-persistent net-tools bridge-utils sqlite3 python3 python3-pip
-pip3 install -q psutil netifaces
+apt-get install -y dnsmasq hostapd nftables iptables iptables-persistent net-tools bridge-utils sqlite3 python3 python3-psutil python3-netifaces
 
 echo net.ipv4.ip_forward=1 > /etc/sysctl.d/99-router.conf
 sysctl -p /etc/sysctl.d/99-router.conf
