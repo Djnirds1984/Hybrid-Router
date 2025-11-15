@@ -17,23 +17,34 @@
   - `echo 'net.ipv4.ip_forward=1' | sudo tee /etc/sysctl.d/99-router.conf`
   - `sudo sysctl -p /etc/sysctl.d/99-router.conf`
 
-## Clone and Build
-- Clone repo: `git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router`
-- Install API deps: `npm ci`
-- Build Web UI:
-  - `cd web && npm ci && npm run build && cd ..`
-  - Built files land in `public/`
+## Repository Location and Clone
+- Recommended production path: `/opt/hybrid-router`
+  - `sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router`
+- Alternatively, clone to your home directory and let the scripts deploy to `/opt/hybrid-router`:
+  - `git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router`
+  - Use `--install-dir /opt/hybrid-router` when running installation scripts
 
 ## Run (Development)
 - Start API: `npm run dev:api` (port `8080`)
 - Start UI: `npm run dev:web` (port `3000`, proxies `/api` and `/ws`)
 - Open UI: `http://localhost:3000`
 
-## Production Layout
-- Copy project to `/opt/hybrid-router`:
-  - `sudo mkdir -p /opt/hybrid-router && sudo rsync -a --exclude='.git' ./ /opt/hybrid-router/`
-- Alternatively, clone directly from GitHub to `/opt/hybrid-router`:
-  - `sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router`
+## Installation Steps
+- Step 1: System update and essentials
+  - `sudo apt update && sudo apt upgrade -y`
+  - `sudo apt install -y git nodejs npm python3 python3-psutil python3-netifaces dnsmasq hostapd iptables nftables net-tools bridge-utils sqlite3`
+- Step 2: Clone repository (choose one)
+  - Production: `sudo git clone https://github.com/Djnirds1984/Hybrid-Router.git /opt/hybrid-router`
+  - Development: `git clone https://github.com/Djnirds1984/Hybrid-Router.git && cd Hybrid-Router`
+- Step 3: Install API service (no manual config needed)
+  - If cloned to `/opt/hybrid-router`: `cd /opt/hybrid-router && sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret <secret> --default-admin <password>`
+  - If cloned elsewhere: from repo root `sudo bash scripts/install_api_service.sh --install-dir /opt/hybrid-router --jwt-secret <secret> --default-admin <password>`
+- Step 4: Configure NAT Router (Ethernet WAN, Wi‑Fi LAN)
+  - Run: `sudo bash scripts/install_nat_router.sh --install-dir /opt/hybrid-router`
+  - Optional flags: `--wan eth0 --lan wlan0 --lan-subnet 192.168.50.0/24 --lan-start 192.168.50.10 --lan-end 192.168.50.200 --lan-gw 192.168.50.1 --ssid HybridRouter --psk ChangeMeStrong! --channel 6 --firewall nftables|iptables`
+- Step 5 (optional): Reverse proxy for large deployments
+  - Nginx: `sudo bash scripts/install_nginx_proxy.sh --install-dir /opt/hybrid-router --api-port 8080 --server-name your.domain --enable-tls true --email admin@your.domain`
+  - Apache: `sudo bash scripts/install_apache_proxy.sh --install-dir /opt/hybrid-router --api-port 8080 --server-name your.domain --enable-tls true --email admin@your.domain`
 - Install dependencies under `/opt/hybrid-router`:
   - `cd /opt/hybrid-router && sudo npm ci && cd web && sudo npm ci && sudo npm run build && cd ..`
 
